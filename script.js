@@ -1,3 +1,5 @@
+const DAYS = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
+
 const formEl = document.querySelector("form.form")
 const inputEl = document.querySelector(".form__input")
 const habitContainerEl = document.querySelector(".habit-list")
@@ -14,14 +16,25 @@ function saveHabits(habits) {
 
 // let habits = []
 
+function createDays(habit) {
+    return DAYS.map(
+        (day, i) => `
+            <div data-id=${habit.id} data-index=${i} class="day${habit.done.includes(i) ? " day--done" : ""}">
+                <span class="day__label">${day}</span>
+                <div class="day__circle"></div>
+            </div>
+        `,
+    ).join("")
+}
+
 function renderHabit(habit) {
     return `
     <li class="habit">
         <div class="habit__header">
             <h2 class="habit__name">${habit.name}</h2>
-            <button class="habit__delete">&cross;</button>
+            <button data-id=${habit.id} class="habit__delete">&cross;</button>
         </div>
-        <div class="habit__days"></div>
+        <div class="habit__days">${createDays(habit)}</div>
     </li>
     `
 }
@@ -41,6 +54,7 @@ function handleSubmit(e) {
     const newHabit = {
         name:inputEl.value.trim(),
         id: Date.now(),
+        done: [0, 2, 5],
     }
 
     // habits.push(newHabit)
@@ -55,6 +69,43 @@ function handleSubmit(e) {
     inputEl.value = ""
 }
 
+function handleHabit(e) {
+    const delHabitBtn = e.target.closest(".habit__delete")
+
+    if (delHabitBtn) {
+        const habitId = delHabitBtn.dataset.id
+
+        const oldHabits = loadHabits()
+
+        const newHabits = oldHabits.filter(el => el.id != habitId)
+
+        saveHabits(newHabits)
+        render()
+    }
+
+    const dayHabitBtn = e.target.closest(".day")
+
+    if (dayHabitBtn) {
+        const id = dayHabitBtn.dataset.id
+        const index = dayHabitBtn.dataset.index
+        const habits = loadHabits()
+
+        const newHabit = habits.map(el => {
+            if (el.id !== Number(id)) return el
+
+            const isDone = el.done.includes(index)
+
+            return {...el,
+                done: isDone ? el.done.filter(day => day !== index) : [...el.done, Number(index)]
+            }
+        })
+
+        saveHabits(newHabit)
+        render()
+    }
+}
+
+habitContainerEl.addEventListener("click", handleHabit)
 formEl.addEventListener('submit', handleSubmit)
 
 render()
