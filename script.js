@@ -21,7 +21,7 @@ function createDays(habit) {
         (day, i) => `
             <div data-id=${habit.id} data-index=${i} class="day${habit.done.includes(i) ? " day--done" : ""}">
                 <span class="day__label">${day}</span>
-                <div class="day__circle"></div>
+                <div class="day__circle">${habit.done.includes(i) ? "&#10003" : ""} </div>
             </div>
         `,
     ).join("")
@@ -54,7 +54,7 @@ function handleSubmit(e) {
     const newHabit = {
         name:inputEl.value.trim(),
         id: Date.now(),
-        done: [0, 2, 5],
+        done: [],
     }
 
     // habits.push(newHabit)
@@ -86,17 +86,17 @@ function handleHabit(e) {
     const dayHabitBtn = e.target.closest(".day")
 
     if (dayHabitBtn) {
-        const id = dayHabitBtn.dataset.id
-        const index = dayHabitBtn.dataset.index
+        const id = Number(dayHabitBtn.dataset.id)
+        const index = Number(dayHabitBtn.dataset.index)
         const habits = loadHabits()
 
         const newHabit = habits.map(el => {
-            if (el.id !== Number(id)) return el
+            if (el.id !== id) return el
 
             const isDone = el.done.includes(index)
 
             return {...el,
-                done: isDone ? el.done.filter(day => day !== index) : [...el.done, Number(index)]
+                done: isDone ? el.done.filter(day => day !== index) : [...el.done, index]
             }
         })
 
